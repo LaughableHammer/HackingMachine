@@ -84,6 +84,16 @@ RUN sed -i s/^#\ en_US.UTF-8\ UTF-8/en_US.UTF-8\ UTF-8/ /etc/locale.gen
 RUN locale-gen
 
 # #####################################################
+# create the non-root kali user
+# #####################################################
+
+RUN useradd -m -s /bin/bash ${UNAME} && \
+    usermod -a -G sudo ${UNAME} && \
+    echo '%sudo ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+RUN echo "${UNAME}:${UPASS}" | chpasswd
+
+# #####################################################
 # create the start bash shell file
 # #####################################################
 
@@ -96,13 +106,6 @@ RUN chmod 755 /startkali.sh
 # #####################################################
 
 RUN apt -y install --no-install-recommends ${KALI_PKG}
-
-# #####################################################
-# create the non-root kali user
-# #####################################################
-
-RUN useradd -m -s /bin/bash -G sudo ${UNAME}
-RUN echo "${UNAME}:${UPASS}" | chpasswd
 
 # #####################################################
 # change the ssh port in /etc/ssh/sshd_config
@@ -190,6 +193,30 @@ RUN if [ "xvnc" = "x${REMOTE_ACCESS}" ] ; \
         chown ${UNAME}:${UNAME} /home/${UNAME}/.vnc/passwd ;\
         chmod 600 /home/${UNAME}/.vnc/passwd ;\
     fi
+
+
+# #####################################################
+# packages that I added
+# #####################################################
+
+ENV LC_ALL=en_US.UTF-8
+ENV PYTHONBINDING=UTF-8
+
+RUN apt install -y gdb git
+
+USER ${UNAME}
+WORKDIR /home/${UNAME}
+
+RUN git clone https://github.com/pwndbg/pwndbg && \
+    cd pwndbg && \
+    ./setup.sh
+
+USER root
+
+RUN apt -y install kali-tools-top10 kali-tools-crypto-stego kali-linux-headless
+
+RUN wget https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb
+RUN apt -y install ./stegseek_0.6-1.deb
 
 # ###########################################################
 # The /startkali.sh script may terminate, i.e. if we only 

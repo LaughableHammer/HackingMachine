@@ -40,13 +40,13 @@ DOCKERIMG="custom/kali-linux"
 CONTAINER="kali-linux"
 
 # Host directory to mount to container
-HOSTDIR="/home/user"
+HOSTDIR="/home/laughablehammer"
 
 # Container directory to mount host directory
-CONTAINERDIR="/opt"
+CONTAINERDIR="/host"
 
 # Username for container user
-USERNAME="user"
+USERNAME="laughablehammer"
 
 # Password for container user
-PASSWORD="password123"
+PASSWORD="password"
